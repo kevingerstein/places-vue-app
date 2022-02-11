@@ -9,6 +9,7 @@ export default {
       currentPlace: {},
       editPlaceParams: {},
       createPlaceParams: {},
+      errors: [],
     };
   },
   created: function () {
@@ -25,7 +26,7 @@ export default {
           console.log(response.data);
           this.places.push(response.data);
         })
-        .catch((error) => console.log(error.response.data.errors));
+        .catch((error) => console.log((this.errors = error.response.data.errors)));
     },
     showPlace: function (place) {
       this.currentPlace = place;
@@ -39,13 +40,13 @@ export default {
         .then((response) => {
           console.log(response.data);
         })
-        .catch((error) => console.log(error.response.data.errors));
+        .catch((error) => console.log((this.errors = error.response.data.errors)));
     },
     destroyPlace: function (place) {
       axios
         .delete(`/places/${place.id}`)
         .then((response) => console.log(response.data))
-        .catch((error) => console.log(error.response.data.errors));
+        .catch((error) => console.log((this.errors = error.response.data.errors)));
     },
   },
 };
@@ -64,6 +65,9 @@ export default {
         <input type="text" v-model="createPlaceParams.address" />
       </p>
       <button v-on:click="createPlace()">Create</button>
+      <ul>
+        <li v-for="error in errors" :key="error.id">{{ error }}</li>
+      </ul>
     </div>
     <h3>All Places...</h3>
     <div v-for="place in places" :key="place.id">
@@ -72,7 +76,7 @@ export default {
       <button v-on:click="showPlace(place)">Show Info</button>
     </div>
     <dialog id="place-details">
-      <form>
+      <form method="dialog">
         <p>
           Name:
           <input type="text" v-model="editPlaceParams.name" />
@@ -81,8 +85,11 @@ export default {
           Address:
           <input type="text" v-model="editPlaceParams.address" />
         </p>
-        <button v-on:click="updatePlace(editPlaceParams)">Update</button>
-        <button v-on:click="destroyPlace(currentPlace)">Destroy</button>
+        <ul>
+          <li v-for="error in errors" :key="error.id">{{ error }}</li>
+        </ul>
+        <button v-on:click.prevent="updatePlace(editPlaceParams)">Update</button>
+        <button v-on:click.prevent="destroyPlace(currentPlace)">Destroy</button>
         <button>Close</button>
       </form>
     </dialog>
